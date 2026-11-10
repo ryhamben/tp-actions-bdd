@@ -17,7 +17,3 @@ def get_student(conn, student_id):
             (student_id,)
         )
         return cur.fetchone()
-
-
-def average_grade(conn):
-    raise NotImplementedError("Fonction non implementee")

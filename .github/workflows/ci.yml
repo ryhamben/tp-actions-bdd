@@ -107,3 +107,30 @@ jobs:
       - name: Executer les tests
         run: vendor/bin/phpunit tests
         working-directory: php-app
+
+
+  build:
+    runs-on: ubuntu-latest
+
+    needs: [python, node, java, php]
+
+    steps:
+      - name: Build du projet
+        run: echo "Tous les tests sont reussis. Build termine."
+
+
+  deploy:
+    runs-on: ubuntu-latest
+
+    needs: build
+
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Demarrer le deploiement
+        run: echo "Deploiement en cours"
+
+      - name: Verifier le secret
+        env:
+          TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+        run: test -n "$TOKEN" && echo "Token present"

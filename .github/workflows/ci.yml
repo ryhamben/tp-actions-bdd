@@ -6,8 +6,14 @@ on:
   pull_request:
 
 jobs:
+
+  # JOB PYTHON
   python:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.12"]
 
     steps:
       - name: Recuperer le code
@@ -19,7 +25,7 @@ jobs:
       - name: Installer Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python-version }}
 
       - name: Installer les dependances
         run: pip install -r requirements.txt
@@ -28,3 +34,76 @@ jobs:
       - name: Executer les tests
         run: pytest -v
         working-directory: python-app
+
+
+  # JOB NODE
+  node:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Recuperer le code
+        uses: actions/checkout@v4
+
+      - name: Preparer PostgreSQL
+        run: bash db/setup.sh
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Installer les dependances
+        run: npm ci
+        working-directory: node-app
+
+      - name: Executer les tests
+        run: npm test
+        working-directory: node-app
+
+
+  # JOB JAVA
+  java:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Recuperer le code
+        uses: actions/checkout@v4
+
+      - name: Preparer PostgreSQL
+        run: bash db/setup.sh
+
+      - name: Installer Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Compiler et tester
+        run: mvn -B package
+        working-directory: java-app
+
+
+  # JOB PHP
+  php:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Recuperer le code
+        uses: actions/checkout@v4
+
+      - name: Preparer PostgreSQL
+        run: bash db/setup.sh
+
+      - name: Installer PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: pdo, pdo_pgsql
+
+      - name: Installer les dependances
+        run: composer install --no-interaction
+        working-directory: php-app
+
+      - name: Executer les tests
+        run: vendor/bin/phpunit tests
+        working-directory: php-app
